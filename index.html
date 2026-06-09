@@ -326,9 +326,11 @@ figure.fig figcaption { font-size: .85rem; color: var(--muted); line-height: 1.5
 
 /* stat band: borderless KPI strip, hairline top/bottom (no individual boxes) */
 .bi-kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 1.4rem 1.2rem;
-  margin: 1.7rem 0; padding: 1.2rem .2rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  margin: 1.7rem 0; padding: 1.2rem .2rem; background: none !important; border: none !important;
+  border-top: 1px solid var(--border) !important; border-bottom: 1px solid var(--border) !important; border-radius: 0 !important; }
 .bi-kpi { background: none !important; border: none !important; box-shadow: none !important; padding: 0 !important;
   display: flex; flex-direction: column; gap: 3px; }
+#roiKpis { grid-template-columns: repeat(2, 1fr) !important; }  /* half-width figure: clean 2x2, no orphan */
 .bi-kpi-label { font-size: .78rem; color: var(--muted); font-weight: 500; }
 .bi-kpi-value { font-size: 1.5rem; font-weight: 700; color: var(--text); line-height: 1.1; letter-spacing: -.01em; }
 .bi-kpi-sub { font-size: .76rem; color: var(--muted); line-height: 1.4; }
@@ -496,7 +498,7 @@ figure.fig figcaption { font-size: .85rem; color: var(--muted); line-height: 1.5
       </figure>
     </div>
     <p>Because the scores rank well, risk is concentrated. Contacting the riskiest 20% of the book reaches 64% of all
-      the lapses that are going to happen, with a top-decile lift of 4.65x over contacting people at random. That
+      the lapses that are going to happen, with a top-decile lift of 4.65× over contacting people at random. That
       concentration is what makes targeted outreach economic instead of spraying the whole book.</p>
     <div class="fig-2">
       <figure class="fig">

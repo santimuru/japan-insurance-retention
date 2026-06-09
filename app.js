@@ -45,7 +45,7 @@
     grid: { left: 44, right: 16, top: 18, bottom: 24 },
     tooltip: Object.assign({ trigger: "axis", valueFormatter: function (v) { return v + "M"; } }, tipStyle),
     xAxis: Object.assign({ type: "category", data: MACRO.policies_series.map(function (p) { return p.year; }) }, axBase),
-    yAxis: Object.assign({ type: "value", min: 184, max: 196, name: "millions", scale: true }, axBase),
+    yAxis: Object.assign({ type: "value", min: 184, max: 196, name: "Millions", scale: true }, axBase),
     series: [{
       type: "line", smooth: true, symbol: "circle", symbolSize: 6,
       data: MACRO.policies_series.map(function (p) { return p.v; }),
@@ -70,7 +70,7 @@
     tooltip: Object.assign({ trigger: "axis", axisPointer: { type: "shadow" },
       formatter: function (ps) { var p = ps[0]; var r = impRev[p.dataIndex];
         return r.feature + "<br>importance " + r.pct + " ±" + r.std_pct; } }, tipStyle),
-    xAxis: Object.assign({ type: "value", name: "relative importance", max: 110 }, axBase),
+    xAxis: Object.assign({ type: "value", name: "Relative importance", max: 110 }, axBase),
     yAxis: Object.assign({ type: "category", data: impRev.map(function (r) { return r.feature; }) }, axBase,
       { axisLabel: { color: PAL.text2, fontFamily: FONT, fontSize: 11 } }),
     series: [
@@ -117,11 +117,11 @@
     grid: { left: 8, right: 28, top: 10, bottom: 24, containLabel: true },
     tooltip: Object.assign({ trigger: "axis", axisPointer: { type: "shadow" },
       valueFormatter: function (v) { return v + " (rel.)"; } }, tipStyle),
-    xAxis: Object.assign({ type: "value", name: "mean |SHAP|", max: 110 }, axBase),
+    xAxis: Object.assign({ type: "value", name: "Mean |SHAP|", max: 110 }, axBase),
     yAxis: Object.assign({ type: "category", data: sg.map(function (r) { return r.feature; }) }, axBase,
       { axisLabel: { color: PAL.text2, fontFamily: FONT, fontSize: 11 } }),
     series: [{ type: "bar", data: sg.map(function (r) { return r.pct; }), barWidth: "58%",
-      itemStyle: { color: PAL.accent2 || "#7a5ccb", borderRadius: [0, 3, 3, 0] } }],
+      itemStyle: { color: PAL.accent, borderRadius: [0, 3, 3, 0] } }],
   });
 
   // SHAP local (diverging)
@@ -160,8 +160,8 @@
     grid: { left: 48, right: 18, top: 16, bottom: 40 },
     tooltip: Object.assign({ trigger: "item", formatter: function (p) {
       return "Predicted " + p.value[0].toFixed(1) + "%<br>Observed " + p.value[1].toFixed(1) + "%"; } }, tipStyle),
-    xAxis: Object.assign({ type: "value", min: 0, max: relMax, name: "Predicted lapse %", nameLocation: "middle", nameGap: 26 }, axBase),
-    yAxis: Object.assign({ type: "value", min: 0, max: relMax, name: "Observed lapse %" }, axBase),
+    xAxis: Object.assign({ type: "value", min: 0, max: relMax, name: "Predicted lapse (%)", nameLocation: "middle", nameGap: 26 }, axBase),
+    yAxis: Object.assign({ type: "value", min: 0, max: relMax, name: "Observed lapse (%)" }, axBase),
     series: [
       { type: "line", showSymbol: false, data: [[0, 0], [relMax, relMax]], lineStyle: { color: PAL.muted, width: 1, type: "dashed" } },
       { type: "scatter", data: rel, symbolSize: 9, itemStyle: { color: PAL.pos, opacity: .85 } },
@@ -173,8 +173,8 @@
   mk("cGains").setOption({
     grid: { left: 48, right: 18, top: 16, bottom: 40 },
     tooltip: Object.assign({ trigger: "axis", valueFormatter: function (v) { return v.toFixed(0) + "%"; } }, tipStyle),
-    xAxis: Object.assign({ type: "value", min: 0, max: 100, name: "% of book contacted (by risk)", nameLocation: "middle", nameGap: 26 }, axBase),
-    yAxis: Object.assign({ type: "value", min: 0, max: 100, name: "% lapses captured" }, axBase),
+    xAxis: Object.assign({ type: "value", min: 0, max: 100, name: "Book contacted (%, by risk)", nameLocation: "middle", nameGap: 26 }, axBase),
+    yAxis: Object.assign({ type: "value", min: 0, max: 100, name: "Lapses captured (%)" }, axBase),
     series: [
       { type: "line", smooth: true, symbol: "circle", symbolSize: 5, data: gains,
         lineStyle: { color: PAL.pos, width: 2.5 }, itemStyle: { color: PAL.pos }, areaStyle: { color: "rgba(46,158,107,.08)" },
@@ -186,10 +186,10 @@
   // cross-sectional 12-month lapse rate by current policy duration (no faked cohort survival)
   var HZ = MODEL.duration_profile.hazard;
   mk("cSurv").setOption({
-    grid: { left: 46, right: 18, top: 18, bottom: 36 },
+    grid: { left: 48, right: 18, top: 16, bottom: 40 },
     tooltip: Object.assign({ trigger: "axis", valueFormatter: function (v) { return v.toFixed(1) + "%"; } }, tipStyle),
-    xAxis: Object.assign({ type: "value", min: 0, max: 20, name: "Policy duration (years)", nameLocation: "middle", nameGap: 24 }, axBase),
-    yAxis: Object.assign({ type: "value", min: 0, name: "12-month lapse rate %" }, axBase),
+    xAxis: Object.assign({ type: "value", min: 0, max: 20, name: "Policy duration (years)", nameLocation: "middle", nameGap: 26 }, axBase),
+    yAxis: Object.assign({ type: "value", min: 0, name: "12-month lapse rate (%)" }, axBase),
     series: [{
       type: "bar", data: HZ.map(function (h) { return [h.t, h.h * 100]; }),
       itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -284,11 +284,11 @@
   mk("cSens").setOption({
     grid: { left: 56, right: 12, top: 12, bottom: 52 },
     tooltip: Object.assign({ position: "top", formatter: function (p) {
-      return "uplift " + pct(SS.uplift[p.value[1]], 0) + " · cost ¥" + fmt(SS.cost[p.value[0]]) + "<br>net <b>¥" + p.value[2] + "B</b>"; } }, tipStyle),
+      return "lapse reduction " + pct(SS.uplift[p.value[1]], 0) + " · cost ¥" + fmt(SS.cost[p.value[0]]) + "<br>net <b>¥" + p.value[2] + "B</b>"; } }, tipStyle),
     xAxis: Object.assign({ type: "category", data: SS.cost.map(function (c) { return "¥" + (c / 1000) + "k"; }),
-      name: "cost / policyholder", nameLocation: "middle", nameGap: 28 }, axBase, { splitArea: { show: true } }),
-    yAxis: Object.assign({ type: "category", data: SS.uplift.map(function (u) { return pct(u, 0); }), name: "uplift" }, axBase, { splitArea: { show: true } }),
-    visualMap: { min: -amax, max: amax, calculable: false, show: false, inRange: { color: [PAL.neg, "#f4f1ea", PAL.pos] } },
+      name: "Cost per policyholder (¥)", nameLocation: "middle", nameGap: 28 }, axBase, { splitArea: { show: true } }),
+    yAxis: Object.assign({ type: "category", data: SS.uplift.map(function (u) { return pct(u, 0); }), name: "Lapse reduction (%)" }, axBase, { splitArea: { show: true } }),
+    visualMap: { min: -amax, max: amax, calculable: false, show: false, inRange: { color: [PAL.neg, "#eef0f4", PAL.pos] } },
     series: [{ type: "heatmap", data: cells,
       label: { show: true, fontFamily: FONT, fontSize: 11, formatter: function (p) { return p.value[2]; },
         color: PAL.text }, itemStyle: { borderColor: "#fff", borderWidth: 2 } }],
