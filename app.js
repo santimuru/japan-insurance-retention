@@ -213,14 +213,22 @@
   var S = MODEL.segments;
   var maxN = Math.max.apply(null, S.map(function (s) { return s.size; }));
   var base = H.overall_lapse_rate * 100;
+  // scale axes to the data (with padding) so bubbles fill the panel, not the bottom-left corner
+  var segLapse = S.map(function (s) { return s.lapse_rate * 100; });
+  var segClv = S.map(function (s) { return s.avg_clv; });
+  var xLo = Math.max(0, Math.floor(Math.min.apply(null, segLapse) - 1.5));
+  var xHi = Math.ceil(Math.max.apply(null, segLapse) + 1.5);
+  var yPad = (Math.max.apply(null, segClv) - Math.min.apply(null, segClv)) * 0.22 || 50000;
+  var yLo = Math.max(0, Math.floor((Math.min.apply(null, segClv) - yPad) / 50000) * 50000);
+  var yHi = Math.ceil((Math.max.apply(null, segClv) + yPad) / 50000) * 50000;
   mk("cSeg").setOption({
-    grid: { left: 64, right: 24, top: 24, bottom: 44 },
+    grid: { left: 78, right: 32, top: 28, bottom: 48 },
     tooltip: Object.assign({ trigger: "item", formatter: function (p) {
       var s = p.data.seg;
       return '<b>' + s.name + '</b><br>Size: ' + fmt(s.size) + ' (' + pct(s.share, 0) + ')<br>Lapse rate: ' +
         pct(s.lapse_rate) + '<br>Avg CLV: ' + jpy(s.avg_clv) + '<br>Avg age: ' + s.avg_age + ' · top: ' + s.top_product; } }, tipStyle),
-    xAxis: Object.assign({ type: "value", name: "Lapse rate (%)", nameLocation: "middle", nameGap: 26, min: 0 }, axBase),
-    yAxis: Object.assign({ type: "value", name: "Avg lifetime value (¥)",
+    xAxis: Object.assign({ type: "value", name: "Lapse rate (%)", nameLocation: "middle", nameGap: 26, min: xLo, max: xHi }, axBase),
+    yAxis: Object.assign({ type: "value", name: "Avg lifetime value (¥)", min: yLo, max: yHi,
       axisLabel: { color: PAL.muted, fontFamily: FONT, fontSize: 11, formatter: function (v) { return jpy(v); } } }, axBase),
     series: [{
       type: "scatter",

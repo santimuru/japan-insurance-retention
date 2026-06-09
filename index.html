@@ -296,7 +296,10 @@ a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-under
 
 /* =============== editorial layer (overrides the BI card chrome) =============== */
 body { background:#fff; }
-.article { max-width: 760px; margin: 0 auto; padding: var(--space-12) var(--space-6) var(--space-16); }
+.article { max-width: 1000px; margin: 0 auto; padding: var(--space-12) var(--space-8) var(--space-16); }
+/* prose capped at a readable measure and LEFT-aligned to the container edge;
+   figures, KPI bands and tables fill the full width. Shared left edge keeps it coherent. */
+.article header, .sec > h2, .sec > .sec-meta, .sec > p, .sec > ul.flow, .sec > .tbl-cap, .author { max-width: 46rem; }
 
 /* type scale: one body size, one small (caption) size, deliberate headings */
 .article p { font-size: 1.0625rem; line-height: 1.72; color: var(--text); margin: 0 0 1.15rem; }
@@ -306,9 +309,8 @@ body { background:#fff; }
 .eyebrow { font-size: .78rem; letter-spacing: .09em; text-transform: uppercase; color: var(--muted);
   font-weight: 600; margin: 0 0 1rem; }
 
-.sec { margin-top: 3.4rem; }
-.sec > h2 { font-size: 1.4rem; font-weight: 600; letter-spacing: -.01em; color: var(--text);
-  margin: 0 0 .3rem; padding-top: 1.6rem; border-top: 1px solid var(--border); }
+.sec { margin-top: 3.4rem; padding-top: 1.8rem; border-top: 1px solid var(--border); }
+.sec > h2 { font-size: 1.4rem; font-weight: 600; letter-spacing: -.01em; color: var(--text); margin: 0 0 .3rem; }
 .sec > h2 .n { color: var(--accent); font-variant-numeric: tabular-nums; margin-right: .55ch; font-weight: 700; }
 .sec-meta { font-size: .85rem; color: var(--muted); margin: 0 0 1.5rem; }
 
@@ -344,15 +346,21 @@ figure.fig figcaption { font-size: .85rem; color: var(--muted); line-height: 1.5
 /* tables: keep, give them a caption + breathing room */
 .tbl-cap { font-size: .95rem; font-weight: 600; color: var(--text); margin: 1.7rem 0 .5rem; }
 .bi-table { font-size: .92rem; }
+.sec > table.bi-table { max-width: 800px; }  /* standalone tables: tighten, don't stretch to full width */
+/* fairness tables: 5 columns in a half-width figure, so compress to fit (no clip, no wrap) */
+#fairAge, #fairInc { width: 100%; font-size: .85rem; }
+#fairAge th, #fairAge td, #fairInc th, #fairInc td { padding-left: .35rem; padding-right: .35rem; }
+#fairAge td:first-child, #fairInc td:first-child { white-space: nowrap; padding-left: 0; }
 
-/* segment list: hairline-separated rows, not stacked cards */
-.bi-stack { display: flex; flex-direction: column; gap: 0; }
-.seg-card.bi-card { background: none; border: none; border-top: 1px solid var(--border); border-radius: 0;
-  box-shadow: none; padding: .9rem 0; gap: .35rem; }
-.seg-card.bi-card:first-child { border-top: none; padding-top: 0; }
-.seg-card h3 { font-size: .98rem; font-weight: 600; }
-.seg-card .seg-stat { font-size: .86rem; }
-.seg-card .note { font-size: .9rem !important; line-height: 1.5; color: var(--text-2) !important; }
+/* segment cards: exactly 5 across below the full-width chart (no orphan row) */
+.seg-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .8rem; margin-top: 1.5rem; }
+@media (max-width: 900px) { .seg-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .seg-grid { grid-template-columns: 1fr; } }
+.seg-card.bi-card { background: var(--surface, #fbfcfd); border: 1px solid var(--border); border-radius: 8px;
+  box-shadow: none; padding: .85rem .9rem; gap: .35rem; }
+.seg-card h3 { font-size: .9rem; font-weight: 600; gap: .4rem; }
+.seg-card .seg-stat { font-size: .8rem; }
+.seg-card .note { font-size: .84rem !important; line-height: 1.45; color: var(--text-2) !important; }
 .dot { width: 9px; height: 9px; border-radius: 2px; display: inline-block; flex: 0 0 auto; }
 
 /* author / publish footer */
@@ -523,16 +531,14 @@ figure.fig figcaption { font-size: .85rem; color: var(--muted); line-height: 1.5
       k-means and chose five segments for actionability, one play each. I am not pretending these are clean natural
       clusters: the silhouette score at k=5 is modest (0.16) and the segments overlap, so they are management
       lenses, not hard partitions. The pattern that matters survives that caveat.</p>
-    <div class="split">
-      <figure class="fig">
-        <div class="cap-h">Value vs risk</div>
-        <div class="chart" id="cSeg" style="height:360px"></div>
-        <figcaption>Bubble size is segment size; the dashed line is the book-average lapse rate. The upper-right
-          quadrant is the strategic problem: the highest-value segment also churns above average, so lifetime value is
-          most exposed exactly where retention is weakest.</figcaption>
-      </figure>
-      <div class="bi-stack" id="segCards"></div>
-    </div>
+    <figure class="fig">
+      <div class="cap-h">Value vs risk</div>
+      <div class="chart" id="cSeg" style="height:460px"></div>
+      <figcaption>Bubble size is segment size; the dashed line is the book-average lapse rate. The upper-right
+        quadrant is the strategic problem: the highest-value segment also churns above average, so lifetime value is
+        most exposed exactly where retention is weakest.</figcaption>
+    </figure>
+    <div class="seg-grid" id="segCards"></div>
   </section>
 
   <!-- 5. BUSINESS CASE ------------------------------------------------------>
