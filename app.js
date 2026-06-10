@@ -66,11 +66,11 @@
   // importance with ±1σ error bars
   var impRev = MODEL.importance.slice().reverse();
   mk("cImp").setOption({
-    grid: { left: 8, right: 30, top: 10, bottom: 24, containLabel: true },
+    grid: { left: 14, right: 30, top: 10, bottom: 40, containLabel: true },
     tooltip: Object.assign({ trigger: "axis", axisPointer: { type: "shadow" },
       formatter: function (ps) { var p = ps[0]; var r = impRev[p.dataIndex];
         return r.feature + "<br>importance " + r.pct + " ±" + r.std_pct; } }, tipStyle),
-    xAxis: Object.assign({ type: "value", name: "Relative importance", max: 110 }, axBase),
+    xAxis: Object.assign({ type: "value", name: "Relative importance (top driver = 100)", nameLocation: "middle", nameGap: 26, max: 110 }, axBase),
     yAxis: Object.assign({ type: "category", data: impRev.map(function (r) { return r.feature; }) }, axBase,
       { axisLabel: { color: PAL.text2, fontFamily: FONT, fontSize: 11 } }),
     series: [
@@ -114,10 +114,10 @@
   // SHAP global
   var sg = MODEL.shap_global.slice().reverse();
   mk("cShapG").setOption({
-    grid: { left: 8, right: 28, top: 10, bottom: 24, containLabel: true },
+    grid: { left: 14, right: 28, top: 10, bottom: 40, containLabel: true },
     tooltip: Object.assign({ trigger: "axis", axisPointer: { type: "shadow" },
       valueFormatter: function (v) { return v + " (rel.)"; } }, tipStyle),
-    xAxis: Object.assign({ type: "value", name: "Mean |SHAP|", max: 110 }, axBase),
+    xAxis: Object.assign({ type: "value", name: "Mean |SHAP| (top = 100)", nameLocation: "middle", nameGap: 26, max: 110 }, axBase),
     yAxis: Object.assign({ type: "category", data: sg.map(function (r) { return r.feature; }) }, axBase,
       { axisLabel: { color: PAL.text2, fontFamily: FONT, fontSize: 11 } }),
     series: [{ type: "bar", data: sg.map(function (r) { return r.pct; }), barWidth: "58%",
@@ -127,11 +127,14 @@
   // SHAP local (diverging)
   var sl = MODEL.shap_local, cs = sl.contributions.slice().reverse();
   mk("cShapL").setOption({
-    grid: { left: 8, right: 24, top: 10, bottom: 24, containLabel: true },
+    grid: { left: 14, right: 24, top: 10, bottom: 40, containLabel: true },
     tooltip: Object.assign({ trigger: "axis", axisPointer: { type: "shadow" },
       valueFormatter: function (v) { return (v >= 0 ? "+" : "") + v.toFixed(2); } }, tipStyle),
-    xAxis: Object.assign({ type: "value", name: "← lowers risk    raises risk →" }, axBase),
-    yAxis: Object.assign({ type: "category", data: cs.map(function (c) { return c.feature; }) }, axBase,
+    xAxis: Object.assign({ type: "value", name: "SHAP contribution", nameLocation: "middle", nameGap: 26 }, axBase),
+    yAxis: Object.assign({ type: "category", data: cs.map(function (c) {
+      return c.feature.replace("Distribution channel = Tied agent (face-to-face)", "Channel: Tied agent")
+        .replace("Distribution channel = ", "Channel: ").replace("Payment method = ", "Payment: ").replace("Product line = ", "Product: ");
+    }) }, axBase,
       { axisLabel: { color: PAL.text2, fontFamily: FONT, fontSize: 10.5 } }),
     series: [{ type: "bar", data: cs.map(function (c) {
       return { value: c.value, itemStyle: { color: c.value >= 0 ? PAL.neg : PAL.pos } }; }), barWidth: "60%" }],
@@ -197,8 +200,9 @@
         { offset: 0, color: "rgba(209,90,77,.75)" }, { offset: 1, color: "rgba(209,90,77,.35)" }]) },
       barWidth: "60%",
       markLine: { silent: true, symbol: "none", lineStyle: { color: PAL.muted, type: "dashed", width: 1 },
-        label: { position: "insideEndTop", color: PAL.muted, fontSize: 10 },
-        data: [{ xAxis: 1, label: { formatter: "13m" } }, { xAxis: 2, label: { formatter: "25m" } }] },
+        label: { color: PAL.muted, fontSize: 10 },
+        data: [{ xAxis: 1, label: { show: false } },
+               { xAxis: 2, label: { formatter: "13m / 25m persistency checks", position: "end", distance: 4, rotate: 0, align: "left" } }] },
     }],
   });
 
@@ -234,9 +238,11 @@
     series: [{
       type: "scatter",
       data: S.map(function (s, i) { return { value: [s.lapse_rate * 100, s.avg_clv], seg: s,
-        symbolSize: 18 + 52 * (s.size / maxN), itemStyle: { color: SEGC[i % SEGC.length], opacity: .82 } }; }),
+        symbolSize: 18 + 52 * (s.size / maxN), itemStyle: { color: SEGC[i % SEGC.length], opacity: .82 },
+        label: { position: s.name === "Mature stable core" ? "bottom" : "top" } }; }),
       label: { show: true, formatter: function (p) { return p.data.seg.name; }, position: "top",
         color: PAL.text2, fontFamily: FONT, fontSize: 10.5, fontWeight: 500 },
+      labelLayout: { moveOverlap: "shiftY", hideOverlap: false },
       markLine: { silent: true, symbol: "none", lineStyle: { color: PAL.muted, type: "dashed", width: 1 },
         data: [{ xAxis: base, label: { formatter: "book avg " + base.toFixed(1) + "%", color: PAL.muted, fontSize: 10 } }] },
     }],
@@ -307,4 +313,8 @@
   document.getElementById("fairNote").textContent = MODEL.fairness.note;
 
   window.addEventListener("resize", function () { charts.forEach(function (c) { c.resize(); }); });
+  // re-measure once webfonts land: labels measured against the fallback font get clipped otherwise
+  if (typeof document.fonts === "object" && document.fonts && document.fonts.ready && document.fonts.ready.then) {
+    document.fonts.ready.then(function () { charts.forEach(function (c) { c.resize(); }); });
+  }
 })();
