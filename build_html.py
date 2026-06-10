@@ -75,6 +75,14 @@ HTML = f"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Predicting and preventing policy lapse · Japanese life market</title>
+<meta name="description" content="An end-to-end case study: lapse-risk modelling (gradient boosting, SHAP), k-means segmentation, a costed retention business case with sensitivity analysis, and a fairness audit, on a declared-synthetic 60,000-policy book with real, cited Japanese market context.">
+<link rel="canonical" href="https://santimuru.github.io/japan-insurance-retention/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Predicting and preventing policy lapse in the Japanese life market">
+<meta property="og:description" content="Lapse-risk model, customer segmentation, costed retention business case and fairness audit. A worked, reproducible case study.">
+<meta property="og:url" content="https://santimuru.github.io/japan-insurance-retention/">
+<meta property="og:image" content="https://santimuru.github.io/japan-insurance-retention/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
@@ -134,6 +142,13 @@ figure.fig figcaption {{ font-size: .8rem; color: var(--muted); line-height: 1.5
 .tbl-cap {{ font-size: .875rem; font-weight: 600; color: var(--text); margin: 1.5rem 0 .5rem; }}
 .bi-table {{ font-size: .86rem; }}
 .sec > table.bi-table {{ max-width: 100%; }}
+.tbl-scroll {{ overflow-x: auto; -webkit-overflow-scrolling: touch; }}
+.tbl-scroll > .bi-table {{ min-width: 480px; }}
+@media (max-width: 720px) {{
+  .article {{ padding: 2.2rem 1.25rem 3rem; }}
+  .bi-table {{ font-size: .8rem; }}
+  .bi-table thead th, .bi-table tbody td {{ padding: var(--space-2); }}
+}}
 #fairAge, #fairInc {{ width: 100%; }}
 #fairAge td:first-child, #fairInc td:first-child {{ white-space: nowrap; }}
 
@@ -171,15 +186,15 @@ figure.fig figcaption {{ font-size: .8rem; color: var(--muted); line-height: 1.5
     <p class="eyebrow">Lapse modelling · a worked case study</p>
     <h1>Predicting and preventing policy lapse in the Japanese life market</h1>
     <p class="lead">A <b>lapse</b> is when a policyholder stops paying and the policy ends, taking its future premiums
-      and value with it. Japan's life market has <b>stopped growing</b>: nine in ten households already have cover and
+      and value with it. Japan's life market is <b>mature and barely growing</b>: nine in ten two-plus-person households already have cover and
       the population is shrinking, so an insurer's value increasingly comes from <b>keeping the policies it already
       holds</b> rather than selling new ones. This case study works that problem end to end: score every in-force policy
       by its chance of lapsing in the next year, explain <b>what is driving</b> that risk, group customers into segments
       a retention team can act on, and estimate <b>what a save campaign is worth</b>.</p>
-    <p>It was built end to end in Python (scikit-learn), and every chart is a live output of the model, not a mock-up. I
+    <p>It was built end to end in Python (scikit-learn), and every chart is a direct output of the fitted model, not a mock-up. I
       have flagged plainly where the evidence is strong and where it is not.</p>
     <p class="honesty">One caveat up front, because it changes how to read every number below. The market figures are
-      real and cited. The policyholder records are <b>synthetic</b>: {n_ph} policies I generated, since real insurer data
+      real and cited. The policyholder records are <b>synthetic</b>: {n_ph} records I generated, since real insurer data
       is confidential. I built the generator so each lapse driver points the way the actuarial literature says it should,
       so the patterns are realistic. The trade-off: the model's accuracy reflects how well it recovers a pattern <i>I</i>
       designed, so on a real book I would expect it to be lower. What carries over is the <b>method and the pipeline</b>,
@@ -202,7 +217,7 @@ figure.fig figcaption {{ font-size: .8rem; color: var(--muted); line-height: 1.5
       <figure class="fig">
         <div class="cap-h">Individual policies in force (millions)</div>
         <div class="chart" id="cPolicies" style="height:240px"></div>
-        <figcaption>Sixteen years of slow growth that is now flattening. Source: LIAJ Fact Book 2024.</figcaption>
+        <figcaption>Slow growth that is now flattening; LIAJ counts 16 straight years of increases. Source: LIAJ Fact Book 2024.</figcaption>
       </figure>
       <figure class="fig">
         <div class="cap-h">The demographic backdrop</div>
@@ -228,9 +243,11 @@ figure.fig figcaption {{ font-size: .8rem; color: var(--muted); line-height: 1.5
     <p>I measured them with <b>AUC</b>, the standard ranking score: the chance the model gives a random lapser a higher
       risk than a random stayer (0.5 is a coin flip, 1.0 is perfect). The boosted model scored <b>{cv_gbm}</b> and the
       logistic <b>{cv_log}</b>. Comparing the two on the same folds (a paired test), the boosted model's <b>+{gap_v}</b>
-      edge is statistically real (p = {gap_p}) but <b>practically negligible</b>: half a thousandth of AUC. So unless
+      edge is statistically real (p = {gap_p}) but <b>practically negligible</b>: half a hundredth of a point of AUC. So unless
       that sliver of ranking power is worth it, I would ship the <b>simpler, more transparent logistic model</b>, the
-      kind a regulator is comfortable with. Knowing the difference between "significant" and "meaningful" is the point.</p>
+      kind a regulator is comfortable with. Knowing the difference between "significant" and "meaningful" is the point.
+      (The analysis below stays on the boosted model because SHAP explanations attach to it most naturally; with this
+      gap, every conclusion holds for either model.)</p>
     <p class="honesty"><b>How to read this 0.79.</b> Because the data is synthetic, the score measures how well the
       pipeline recovers a pattern I built in, not real-world lapse skill, and the same caveat applies to the drivers,
       SHAP, segments and ROI below: they show the method working on a known signal, not validated facts about real
@@ -268,7 +285,7 @@ figure.fig figcaption {{ font-size: .8rem; color: var(--muted); line-height: 1.5
   <!-- 3. PERFORMANCE -------------------------------------------------------->
   <section class="sec">
     <h2><span class="n">3</span>Does it rank, and is it calibrated?</h2>
-    <p class="sec-meta">Held-out test set</p>
+    <p class="sec-meta">Held-out test set · 15,000 policies (25%), stratified</p>
     <p>A retention model has to do two different jobs. It has to <b>rank</b> policies so that outreach goes to the ones
       most likely to leave, and its probabilities have to be <b>calibrated</b> so that "12% risk" really means about
       twelve in a hundred. Ranking pays for the campaign; calibration is what lets you trust the business case later.</p>
@@ -311,11 +328,13 @@ figure.fig figcaption {{ font-size: .8rem; color: var(--muted); line-height: 1.5
       </figure>
     </div>
     <p class="tbl-cap">Risk decile detail</p>
+    <div class="tbl-scroll">
     <table class="bi-table">
       <thead><tr><th>Decile</th><th class="num">Policyholders</th><th class="num">Avg. predicted risk</th>
       <th class="num">Actual lapse rate</th><th class="num">Lift vs base</th><th class="num">Cum. lapses captured</th></tr></thead>
       <tbody id="liftRows"></tbody>
     </table>
+    </div>
   </section>
 
   <!-- 4. SEGMENTATION ------------------------------------------------------->
@@ -325,7 +344,8 @@ figure.fig figcaption {{ font-size: .8rem; color: var(--muted); line-height: 1.5
     <p>Ranking tells you <i>who</i> to call first. Segmentation tells you <i>what to say</i>. I used <b>k-means</b>, which
       groups customers so that each group is as internally similar as possible, on value and behaviour, and picked
       <b>five groups</b> so each gets one clear retention play. I am not claiming these are sharp natural clusters: the
-      silhouette score (a 0-to-1 measure of how cleanly separated the groups are) is only {sil5:.2f}, so they overlap.
+      silhouette score (a measure of how cleanly separated the groups are, from -1 to 1) is only {sil5:.2f}, and k=2
+      separates more cleanly but is too coarse to act on, so they overlap.
       Treat them as <b>management lenses, not hard boxes</b>. The one pattern that matters holds regardless: the
       highest-value group also churns above average, so the most valuable customers are the least safe.</p>
     <figure class="fig">
@@ -378,15 +398,15 @@ figure.fig figcaption {{ font-size: .8rem; color: var(--muted); line-height: 1.5
       the actual lapse rate, the rate at which each group is flagged, and the model's accuracy within the group.</p>
     <figure class="fig">
       <div class="cap-h">By age band</div>
-      <table class="bi-table" style="margin-top:.4rem"><thead><tr><th>Age</th><th class="num">N</th>
+      <div class="tbl-scroll"><table class="bi-table" style="margin-top:.4rem"><thead><tr><th>Age</th><th class="num">N</th>
       <th class="num">Actual lapse</th><th class="num">Flagged rate</th><th class="num">AUC</th></tr></thead>
-      <tbody id="fairAge"></tbody></table>
+      <tbody id="fairAge"></tbody></table></div>
     </figure>
     <figure class="fig">
       <div class="cap-h">By household income</div>
-      <table class="bi-table" style="margin-top:.4rem"><thead><tr><th>Income</th><th class="num">N</th>
+      <div class="tbl-scroll"><table class="bi-table" style="margin-top:.4rem"><thead><tr><th>Income</th><th class="num">N</th>
       <th class="num">Actual lapse</th><th class="num">Flagged rate</th><th class="num">AUC</th></tr></thead>
-      <tbody id="fairInc"></tbody></table>
+      <tbody id="fairInc"></tbody></table></div>
     </figure>
     <p class="note" id="fairNote"></p>
   </section>

@@ -3,7 +3,7 @@
 A self-directed case study: a lapse-prediction and customer-segmentation pipeline
 for life insurance in Japan, with a single-page interactive report.
 
-**Live:** https://santimuru.github.io/metlife-japan-retention/
+**Live:** https://santimuru.github.io/japan-insurance-retention/
 
 ## Open it
 
@@ -12,7 +12,7 @@ Double-click **`index.html`** (needs internet for the Inter font + ECharts CDN).
 ## What it shows
 
 1. Japan life-insurance market context: **real, cited** figures (LIAJ Fact Book 2024, JILI 2024, OECD, MIC).
-2. A gradient-boosting **lapse-risk model** vs a logistic challenger, compared by **5-fold cross-validation** (they tie, reported honestly), with permutation importance **and SHAP** (global + one local explanation).
+2. A gradient-boosting **lapse-risk model** vs a logistic challenger, compared by **5-fold cross-validation** (they effectively tie, reported honestly), with permutation importance **and SHAP** (global + one local explanation).
 3. **Model performance**: ROC, calibration curve, gains/lift, lapse rate by duration, risk-decile table.
 4. **K-means customer segmentation** (value vs risk), silhouette-checked, with a retention play per segment.
 5. A **retention business case** with stated assumptions plus a **sensitivity grid** and break-even.

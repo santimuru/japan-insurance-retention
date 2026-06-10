@@ -58,7 +58,7 @@
   /* ---- 2. model headline ---- */
   document.getElementById("modelKpis").innerHTML = [
     kpiTile("Model AUC (5-fold CV)", H.auc_cv_mean.toFixed(3), "±" + H.auc_cv_std.toFixed(3) + " · logistic " + H.auc_log_cv_mean.toFixed(3) + " (+" + H.gbm_gap.toFixed(3) + ", negligible)"),
-    kpiTile("Base lapse rate", pct(H.overall_lapse_rate, 1), "12-month, synthetic (market ~5.9%)"),
+    kpiTile("Base lapse rate", pct(H.overall_lapse_rate, 1), "12-month, by policy count, synthetic"),
     kpiTile("Top-decile lift", L[0].lift + "×", "vs random targeting"),
     kpiTile("Captured in top 20%", pct(R.capture_top2_deciles, 0), "of all lapses, by score"),
   ].join("");
@@ -138,7 +138,8 @@
   });
   document.getElementById("shapLocalNote").innerHTML =
     "This policyholder scores <b>" + pct(sl.risk, 0) + "</b> lapse risk. The bars show what moved them there: each " +
-    "attribute pushes risk up (red) or down (green) from the average customer. The reason an agent would act on.";
+    "attribute pushes risk up (red) or down (green) relative to the average customer; for this one every driver pushes up. " +
+    "This is what an agent would act on. (The two channel rows are one-hot encodings of the same field, each relative to the baseline channel.)";
 
   /* ---- 3. performance ---- */
   mk("cRoc").setOption({
