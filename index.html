@@ -355,13 +355,13 @@ figure.fig figcaption { font-size: .8rem; color: var(--muted); line-height: 1.5;
 /* tables: keep, give them a caption + breathing room */
 .tbl-cap { font-size: .875rem; font-weight: 600; color: var(--text); margin: 1.5rem 0 .5rem; }
 .bi-table { font-size: .86rem; }
+.bi-table thead th { white-space: normal; }
 .sec > table.bi-table { max-width: 100%; }
-.tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.tbl-scroll > .bi-table { min-width: 480px; }
 @media (max-width: 720px) {
   .article { padding: 2.2rem 1.25rem 3rem; }
   .bi-table { font-size: .8rem; }
   .bi-table thead th, .bi-table tbody td { padding: var(--space-2); }
+  .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 }
 #fairAge, #fairInc { width: 100%; }
 #fairAge td:first-child, #fairInc td:first-child { white-space: nowrap; }

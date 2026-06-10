@@ -256,11 +256,11 @@
     grid: { left: 112, right: 70, top: 8, bottom: 16 },
     tooltip: Object.assign({ trigger: "axis", axisPointer: { type: "shadow" }, valueFormatter: function (v) { return jpy(v); } }, tipStyle),
     xAxis: Object.assign({ type: "value" }, axBase, { axisLabel: { show: false }, splitLine: { show: false } }),
-    yAxis: Object.assign({ type: "category", data: ["Campaign cost", "Net benefit", "Value retained"] }, axBase,
+    yAxis: Object.assign({ type: "category", data: ["Net benefit", "Campaign cost", "Value retained"] }, axBase,
       { axisLabel: { color: PAL.text2, fontFamily: FONT, fontSize: 11 } }),
     series: [{ type: "bar", barWidth: "52%", data: [
-        { value: R.campaign_cost_jpy, itemStyle: { color: PAL.neg, borderRadius: [0, 3, 3, 0] } },
         { value: R.net_benefit_jpy, itemStyle: { color: PAL.warn, borderRadius: [0, 3, 3, 0] } },
+        { value: R.campaign_cost_jpy, itemStyle: { color: PAL.neg, borderRadius: [0, 3, 3, 0] } },
         { value: R.value_retained_jpy, itemStyle: { color: PAL.pos, borderRadius: [0, 3, 3, 0] } } ],
       label: { show: true, position: "right", color: PAL.text2, fontFamily: FONT, fontSize: 11, formatter: function (p) { return jpy(p.value); } } }],
   });
